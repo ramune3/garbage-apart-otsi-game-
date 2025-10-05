@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🗑️ ゴミ分別マスター</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .screen {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      color: white;
+      margin-bottom: 16px;
+      text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 32px;
+    }
+
+    .trash-types {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 32px 0;
+      text-align: left;
+    }
+
+    .trash-type {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 12px;
+      color: white;
+    }
+
+    .trash-type span {
+      font-size: 1.8rem;
+      margin-right: 8px;
+    }
+
+    .points {
+      color: #fbbf24;
+      margin-left: 8px;
+    }
+
+    .info-text {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      margin: 8px 0;
+    }
+
+    .warning-text {
+      color: #fbbf24;
+      font-weight: bold;
+      font-size: 0.9rem;
+      margin-top: 16px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      padding: 16px 48px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s;
+      margin-top: 24px;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .score-board {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .score-item {
+      text-align: center;
+    }
+
+    .score-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .score-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: white;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .combo-value {
+      color: #fbbf24;
+    }
+
+    .timer-value {
+      color: white;
+    }
+
+    .timer-value.warning {
+      color: #ef4444;
+      animation: pulse 0.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .game-area {
+      position: relative;
+      background: linear-gradient(to bottom, #7dd3fc 0%, #bae6fd 100%);
+      border-radius: 16px;
+      height: 500px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 4px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .trash-item {
+      position: absolute;
+      font-size: 3rem;
+      cursor: grab;
+      user-select: none;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: transform 0.1s;
+    }
+
+    .trash-item:hover {
+      transform: scale(1.2);
+    }
+
+    .trash-item:active {
+      cursor: grabbing;
+    }
+
+    .bins-container {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, #166534 0%, #16a34a 100%);
+      height: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 16px;
+    }
+
+    .bin {
+      width: 20%;
+      display: flex;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .bin:hover {
+      transform: scale(1.1);
+    }
+
+    .bin-inner {
+      width: 80px;
+      height: 96px;
+      border-radius: 8px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .bin-icon {
+      color: white;
+      font-size: 2.5rem;
+      margin-bottom: 4px;
+    }
+
+    .bin-label {
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: particle-fade 1s forwards;
+    }
+
+    @keyframes particle-fade {
+      0% { opacity: 1; transform: translate(0, 0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+    }
+
+    .final-score {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+    }
+
+    .final-score-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .final-score-value {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #fbbf24;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .result-emoji {
+      font-size: 5rem;
+      margin-bottom: 16px;
+    }
+
+    .result-message {
+      font-size: 2rem;
+      color: white;
+      margin-top: 16px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen">
+      <h1>🗑️ ゴミ分別マスター</h1>
+      <p class="subtitle">落ちてくるゴミを正しいゴミ箱にドラッグ＆ドロップ！</p>
+      
+      <div class="trash-types">
+        <div class="trash-type">
+          <span>🗑️</span>
+          <strong>一般ゴミ</strong>
+          <span class="points">+10pts</span>
+        </div>
+        <div class="trash-type">
+          <span>♻️</span>
+          <strong>リサイクル</strong>
+          <span class="points">+15pts</span>
+        </div>
+        <div class="trash-type">
+          <span>🔥</span>
+          <strong>可燃ゴミ</strong>
+          <span class="points">+20pts</span>
+        </div>
+        <div class="trash-type">
+          <span>⚡</span>
+          <strong>危険物</strong>
+          <span class="points">+25pts</span>
+        </div>
+        <div class="trash-type" style="grid-column: 1 / -1;">
+          <span>💎</span>
+          <strong>レアアイテム</strong>
+          <span class="points">+50pts</span>
+        </div>
+      </div>
+
+      <p class="info-text">💎 レアアイテムはどのゴミ箱でもOK！</p>
+      <p class="info-text">🔥 連続成功でコンボボーナス！</p>
+      <p class="warning-text">⚠️ ゴミ箱の近くならOK！画面外に出たらミス！</p>
+
+      <button class="btn" onclick="startGame()">ゲームスタート</button>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="hidden">
+      <div class="score-board">
+        <div style="display: flex; gap: 48px;">
+          <div class="score-item">
+            <div class="score-label">スコア</div>
+            <div class="score-value" id="score">0</div>
+          </div>
+          <div class="score-item">
+            <div class="score-label">コンボ</div>
+            <div class="score-value combo-value" id="combo">-</div>
+          </div>
+        </div>
+        <div class="score-item">
+          <div class="score-label">残り時間</div>
+          <div class="score-value timer-value" id="timer">60</div>
+        </div>
+      </div>
+
+      <div class="game-area" id="gameArea">
+        <div class="bins-container" id="binsContainer"></div>
+      </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen hidden">
+      <div class="result-emoji" id="resultEmoji">🏆</div>
+      <h1>ゲーム終了！</h1>
+      
+      <div class="final-score">
+        <div class="final-score-label">最終スコア</div>
+        <div class="final-score-value" id="finalScore">0</div>
+      </div>
+
+      <div class="result-message" id="resultMessage">素晴らしい！</div>
+
+      <button class="btn" onclick="startGame()">もう一度プレイ</button>
+    </div>
+  </div>
+
+  <script>
+    const trashTypes = [
+      { emoji: '🗑️', color: '#94a3b8', points: 10, name: '一般ゴミ' },
+      { emoji: '♻️', color: '#22c55e', points: 15, name: 'リサイクル' },
+      { emoji: '🔥', color: '#ef4444', points: 20, name: '可燃ゴミ' },
+      { emoji: '⚡', color: '#f59e0b', points: 25, name: '危険物' },
+      { emoji: '💎', color: '#8b5cf6', points: 50, name: 'レアアイテム' },
+    ];
+
+    const binTypes = [
+      { color: '#64748b', type: 0, label: '一般', icon: '🗑️' },
+      { color: '#16a34a', type: 1, label: 'リサイクル', icon: '♻️' },
+      { color: '#dc2626', type: 2, label: '可燃', icon: '🔥' },
+      { color: '#d97706', type: 3, label: '危険', icon: '⚡' },
+    ];
+
+    let gameState = {
+      score: 0,
+      combo: 0,
+      timer: 60,
+      trash: [],
+      bins: [],
+      draggingTrash: null,
+      intervals: []
+    };
+
+    function startGame() {
+      // Reset game state
+      gameState = {
+        score: 0,
+        combo: 0,
+        timer: 60,
+        trash: [],
+        bins: [],
+        draggingTrash: null,
+        intervals: []
+      };
+
+      // Clear all intervals
+      gameState.intervals.forEach(clearInterval);
+      gameState.intervals = [];
+
+      // Show game screen
+      document.getElementById('startScreen').classList.add('hidden');
+      document.getElementById('gameOverScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+
+      // Update UI
+      updateScore();
+
+      // Create bins
+      createBins();
+
+      // Start game loops
+      gameState.intervals.push(setInterval(updateTimer, 1000));
+      gameState.intervals.push(setInterval(spawnTrash, 1500));
+      gameState.intervals.push(setInterval(moveTrash, 50));
+    }
+
+    function createBins() {
+      const container = document.getElementById('binsContainer');
+      container.innerHTML = '';
+
+      binTypes.forEach((bin, idx) => {
+        const binEl = document.createElement('div');
+        binEl.className = 'bin';
+        binEl.innerHTML = `
+          <div class="bin-inner" style="background-color: ${bin.color}">
+            <div class="bin-icon">${bin.icon}</div>
+            <div class="bin-label">${bin.label}</div>
+          </div>
+        `;
+        binEl.dataset.type = bin.type;
+        
+        binEl.addEventListener('dragover', (e) => e.preventDefault());
+        binEl.addEventListener('drop', (e) => handleDrop(e, bin));
+        
+        container.appendChild(binEl);
+      });
+    }
+
+    function spawnTrash() {
+      const type = Math.random() < 0.1 ? 4 : Math.floor(Math.random() * 4);
+      const trashData = trashTypes[type];
+      
+      const trash = {
+        id: Date.now() + Math.random(),
+        type,
+        x: Math.random() * 80 + 10,
+        y: -10,
+        rotation: Math.random() * 360,
+        speed: 1 + Math.random() * 2,
+        wobble: Math.random() * 4 - 2,
+        ...trashData
+      };
+
+      gameState.trash.push(trash);
+
+      const trashEl = document.createElement('div');
+      trashEl.className = 'trash-item';
+      trashEl.draggable = true;
+      trashEl.textContent = trash.emoji;
+      trashEl.dataset.id = trash.id;
+      trashEl.style.left = `${trash.x}%`;
+      trashEl.style.top = `${trash.y}%`;
+      trashEl.style.transform = `rotate(${trash.rotation}deg)`;
+
+      trashEl.addEventListener('dragstart', (e) => {
+        gameState.draggingTrash = trash;
+      });
+
+      document.getElementById('gameArea').appendChild(trashEl);
+    }
+
+    function moveTrash() {
+      gameState.trash = gameState.trash.filter(trash => {
+        trash.y += trash.speed * 0.5;
+        trash.x += Math.sin(trash.y / 10) * trash.wobble * 0.05;
+        trash.rotation += trash.speed * 0.5;
+
+        const trashEl = document.querySelector(`[data-id="${trash.id}"]`);
+        if (trashEl) {
+          trashEl.style.top = `${trash.y}%`;
+          trashEl.style.left = `${trash.x}%`;
+          trashEl.style.transform = `rotate(${trash.rotation}deg)`;
+        }
+
+        if (trash.y > 110) {
+          if (trashEl) trashEl.remove();
+          return false;
+        }
+
+        return true;
+      });
+    }
+
+    function handleDrop(e, bin) {
+      e.preventDefault();
+      if (!gameState.draggingTrash) return;
+
+      const trash = gameState.draggingTrash;
+
+      // Check if trash is still on screen
+      if (trash.y < 0 || trash.y > 100) {
+        gameState.draggingTrash = null;
+        return;
+      }
+
+      const isCorrect = trash.type === bin.type || trash.type === 4;
+
+      if (isCorrect) {
+        gameState.combo++;
+        const points = Math.floor(trash.points * (1 + gameState.combo * 0.1));
+        gameState.score += points;
+        createParticles(50, 70, trash.color);
+      } else {
+        gameState.combo = 0;
+        gameState.score = Math.max(0, gameState.score - 5);
+      }
+
+      // Remove trash
+      const trashEl = document.querySelector(`[data-id="${trash.id}"]`);
+      if (trashEl) trashEl.remove();
+      gameState.trash = gameState.trash.filter(t => t.id !== trash.id);
+
+      gameState.draggingTrash = null;
+      updateScore();
+    }
+
+    function createParticles(x, y, color) {
+      const gameArea = document.getElementById('gameArea');
+      
+      for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = `${x}%`;
+        particle.style.top = `${y}%`;
+        particle.style.backgroundColor = color;
+        particle.style.boxShadow = `0 0 10px ${color}`;
+        
+        const vx = (Math.random() - 0.5) * 100;
+        const vy = (Math.random() - 0.5) * 100;
+        particle.style.setProperty('--tx', `${vx}px`);
+        particle.style.setProperty('--ty', `${vy}px`);
+        
+        gameArea.appendChild(particle);
+        
+        setTimeout(() => particle.remove(), 1000);
+      }
+    }
+
+    function updateTimer() {
+      gameState.timer--;
+      const timerEl = document.getElementById('timer');
+      timerEl.textContent = `${gameState.timer}秒`;
+      
+      if (gameState.timer < 10) {
+        timerEl.classList.add('warning');
+      }
+
+      if (gameState.timer <= 0) {
+        endGame();
+      }
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = gameState.score;
+      document.getElementById('combo').textContent = gameState.combo > 0 ? `x${gameState.combo}` : '-';
+    }
+
+    function endGame() {
+      gameState.intervals.forEach(clearInterval);
+      gameState.intervals = [];
+
+      // Clear trash
+      document.querySelectorAll('.trash-item').forEach(el => el.remove());
+
+      // Show game over screen
+      document.getElementById('gameScreen').classList.add('hidden');
+      document.getElementById('gameOverScreen').classList.remove('hidden');
+
+      // Update results
+      document.getElementById('finalScore').textContent = gameState.score;
+      
+      const emoji = gameState.score > 500 ? '🏆' : gameState.score > 300 ? '🌟' : '👍';
+      const message = gameState.score > 500 ? '素晴らしい！分別マスター！' : 
+                      gameState.score > 300 ? 'いい感じ！頑張りました！' : 
+                      'もう一度チャレンジ！';
+      
+      document.getElementById('resultEmoji').textContent = emoji;
+      document.getElementById('resultMessage').textContent = message;
+    }
+  </script>
+</body>
+</html>
