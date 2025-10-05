@@ -6,4 +6,4 @@
 
 ※全てClaude Sonnet 4.5によるコード生成です。 プロンプトによる調整や作成をしました。
 
-ここからPlayできます；
+ここからPlayできます；https://ramune3.github.io/garbage-apart-otsi-game-/trash_game_html.html
